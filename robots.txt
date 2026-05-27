@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /*?payment=success
+
+# Point Google directly to your stateless sitemap
+Sitemap: https://oscargml.github.io/MediShield/sitemap.xml
