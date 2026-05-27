@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stateless Medical Bill Auditor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+
+    <header class="bg-blue-600 text-white py-4 px-6 shadow-md">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight">MediShield Auditor</h1>
+            <div class="bg-blue-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-blue-500">
+                <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
+                100% Stateless: Data Never Leaves Your Device
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <section class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">1. Case Details</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1" for="facilityName">Hospital / Facility Name</label>
+                    <input type="text" id="facilityName" value="General Community Hospital" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-1" for="visitDate">Date of Visit</label>
+                    <input type="date" id="visitDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </div>
+
+            <h2 class="text-lg font-bold mb-3 text-gray-800">2. Environmental Factors</h2>
+            <div class="space-y-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="isEmergency" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                    <span class="text-sm font-medium text-gray-700">This was an Emergency Room / Urgent Care visit</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="facilityInNetwork" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                    <span class="text-sm font-medium text-gray-700">The hospital/facility itself is <b>In-Network</b> for my insurance</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <!-- Fixed: was "providerInNetwork" but label said Out-of-Network — logic was inverted -->
+                    <input type="checkbox" id="providerOutOfNetwork" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                    <span class="text-sm font-medium text-gray-700">The specific doctor/provider was <b>Out-of-Network</b></span>
+                </label>
+            </div>
+
+            <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-800">3. Bill Line Items</h2>
+                <button type="button" onclick="addInvoiceRow()" class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded-lg font-semibold hover:bg-blue-100 transition">
+                    + Add Item
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-xs font-bold text-gray-400 uppercase">
+                            <th class="py-2 pr-2 w-5/12">Description / Keyword</th>
+                            <th class="py-2 px-2 w-3/12">Billing Code (Optional)</th>
+                            <th class="py-2 pl-2 w-3/12 text-right">Charged Amount</th>
+                            <th class="py-2 pl-2 w-1/12"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="lineItemsTableBody">
+                        <tr class="border-b border-gray-100 item-row">
+                            <td class="py-3 pr-2">
+                                <input type="text" class="item-desc w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none" value="Sterile Tray / Surgical Supplies">
+                            </td>
+                            <td class="py-3 px-2">
+                                <input type="text" class="item-code w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none" value="99070">
+                            </td>
+                            <td class="py-3 pl-2 text-right">
+                                <input type="number" min="0" step="0.01" class="item-charge text-right w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none font-medium" value="250.00">
+                            </td>
+                            <td class="py-3 pl-2 text-center">
+                                <button type="button" onclick="this.closest('tr').remove()" class="text-gray-300 hover:text-red-400 text-xl leading-none font-bold" aria-label="Remove row">&times;</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button onclick="evaluateBill()" class="w-full mt-6 bg-blue-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-blue-700 transition tracking-wide">
+                Analyze Statement Locally
+            </button>
+        </section>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Audit Verdict</h2>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Potential Savings</span>
+                        <span id="savingsDisplay" class="text-2xl font-black text-gray-800">$0.00</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Flags Found</span>
+                        <span id="flagsDisplay" class="text-2xl font-black text-gray-800">0</span>
+                    </div>
+                </div>
+
+                <div id="legalAlertBox" class="hidden mb-6 p-4 rounded-xl text-sm border"></div>
+
+                <!-- aria-live so screen readers announce new findings -->
+                <div id="flagsFeed" class="space-y-3" aria-live="polite" aria-atomic="true">
+                    <p class="text-gray-400 text-sm text-center py-6 italic">Click analyze to review items for compliance anomalies.</p>
+                </div>
+            </div>
+
+            <div id="premiumBlock" class="hidden mt-6 pt-4 border-t border-gray-100">
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 mb-3">
+                    <b>Premium PDF Dispute Package Available:</b> Includes dynamic federal code injections, legal boilerplate dispute text, and a formalized hospital appeal document.
+                </div>
+                <button onclick="triggerPremiumCheckout()" class="w-full bg-amber-500 text-white font-bold py-2.5 rounded-lg shadow-sm hover:bg-amber-600 transition flex items-center justify-center gap-1.5 text-sm">
+                    Generate Premium Dispute PDF ($5)
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Initialize Stripe lazily inside triggerPremiumCheckout to avoid throwing on page load
+        // with a placeholder key. Replace with your actual publishable key before deploying.
+        const STRIPE_PUBLISHABLE_KEY = 'pk_live_your_key_here';
+        const STRIPE_PRICE_ID = 'price_your_id_here';
+
+        let localAuditSession = null;
+
+        document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
+
+        // Escapes user-supplied strings before inserting into innerHTML to prevent XSS
+        function esc(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function addInvoiceRow() {
+            const tbody = document.getElementById('lineItemsTableBody');
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-100 item-row';
+            row.innerHTML = `
+                <td class="py-3 pr-2">
+                    <input type="text" class="item-desc w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none" placeholder="e.g., Sterile Dressing">
+                </td>
+                <td class="py-3 px-2">
+                    <input type="text" class="item-code w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none" placeholder="e.g., 99070">
+                </td>
+                <td class="py-3 pl-2 text-right">
+                    <input type="number" min="0" step="0.01" class="item-charge text-right w-full bg-transparent text-sm border-b border-transparent hover:border-gray-200 focus:border-blue-500 focus:outline-none font-medium" value="0.00">
+                </td>
+                <td class="py-3 pl-2 text-center">
+                    <button type="button" onclick="this.closest('tr').remove()" class="text-gray-300 hover:text-red-400 text-xl leading-none font-bold" aria-label="Remove row">&times;</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function evaluateBill() {
+            const facilityName = document.getElementById('facilityName').value.trim();
+            const visitDate = document.getElementById('visitDate').value;
+            const isEmergency = document.getElementById('isEmergency').checked;
+            const facilityInNetwork = document.getElementById('facilityInNetwork').checked;
+            // Fixed: variable now matches label semantics (checked = provider IS out-of-network)
+            const providerOutOfNetwork = document.getElementById('providerOutOfNetwork').checked;
+
+            const items = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                const desc = row.querySelector('.item-desc').value.trim();
+                const code = row.querySelector('.item-code').value.trim();
+                const charge = parseFloat(row.querySelector('.item-charge').value) || 0;
+                if (desc) items.push({ description: desc, code, charged: charge });
+            });
+
+            if (items.length === 0) {
+                alert('Add at least one line item with a description before analyzing.');
+                return;
+            }
+
+            localAuditSession = {
+                facilityName,
+                visitDate,
+                isEmergency,
+                facilityInNetwork,
+                providerOutOfNetwork,
+                lineItems: items,
+                isIllegalBalanceBill: false,
+                flaggedItems: [],
+                totalSavingsEstimated: 0,
+                violationReason: ''
+            };
+
+            // 1. Federal No Surprises Act check
+            // Violation: emergency at in-network facility with an out-of-network provider
+            if (isEmergency && facilityInNetwork && providerOutOfNetwork) {
+                localAuditSession.isIllegalBalanceBill = true;
+                localAuditSession.violationReason = 'Federal No Surprises Act Violation: Emergency treatment was carried out at an In-Network facility. Out-of-network physicians/groups are legally prohibited from balance-billing patients under these conditions.';
+            }
+
+            // 2. Scan lines for routine clinical unbundling
+            localAuditSession.lineItems.forEach(item => {
+                const desc = item.description.toLowerCase();
+                if (item.code === '99070' || desc.includes('tray') || desc.includes('kit')) {
+                    localAuditSession.flaggedItems.push({
+                        item: item.description,
+                        issue: 'Routine Supply Unbundling',
+                        details: 'Standard basic operation kits or supplies cannot be itemized separately; they belong directly inside the base facility room billing tier.',
+                        amountFlagged: item.charged
+                    });
+                    localAuditSession.totalSavingsEstimated += item.charged;
+                }
+            });
+
+            renderDashboardOutputs();
+        }
+
+        function renderDashboardOutputs() {
+            if (!localAuditSession) return;
+
+            // Use textContent for plain strings — avoids layout reflow from innerText
+            document.getElementById('savingsDisplay').textContent = `$${localAuditSession.totalSavingsEstimated.toFixed(2)}`;
+            document.getElementById('flagsDisplay').textContent = localAuditSession.flaggedItems.length + (localAuditSession.isIllegalBalanceBill ? 1 : 0);
+
+            const alertBox = document.getElementById('legalAlertBox');
+            if (localAuditSession.isIllegalBalanceBill) {
+                alertBox.className = 'mb-6 p-4 rounded-xl text-sm border bg-red-50 border-red-200 text-red-900';
+                alertBox.classList.remove('hidden');
+                // violationReason is set internally, not from user input, so esc() is not needed
+                // but applied defensively in case this changes
+                alertBox.innerHTML = `<b>Critical Warning Found:</b> ${esc(localAuditSession.violationReason)}`;
+            } else {
+                alertBox.classList.add('hidden');
+            }
+
+            const feedContainer = document.getElementById('flagsFeed');
+            feedContainer.innerHTML = '';
+
+            if (localAuditSession.flaggedItems.length === 0 && !localAuditSession.isIllegalBalanceBill) {
+                feedContainer.innerHTML = '<p class="text-gray-400 text-sm text-center py-6 italic">No structural errors detected based on standard parameters.</p>';
+            }
+
+            localAuditSession.flaggedItems.forEach(flag => {
+                const card = document.createElement('div');
+                card.className = 'p-3 border border-gray-200 rounded-xl bg-white shadow-xs text-xs';
+                // All user-derived values escaped to prevent XSS
+                card.innerHTML = `
+                    <div class="flex justify-between font-bold text-gray-800 mb-1">
+                        <span>${esc(flag.item)}</span>
+                        <span class="text-red-600">+$${esc(flag.amountFlagged.toFixed(2))}</span>
+                    </div>
+                    <div class="text-amber-700 font-semibold mb-0.5">${esc(flag.issue)}</div>
+                    <div class="text-gray-500">${esc(flag.details)}</div>
+                `;
+                feedContainer.appendChild(card);
+            });
+
+            // Use classList to preserve all existing Tailwind utility classes
+            document.getElementById('premiumBlock').classList.remove('hidden');
+        }
+
+        function triggerPremiumCheckout() {
+            if (!localAuditSession) return;
+
+            if (!STRIPE_PUBLISHABLE_KEY || STRIPE_PUBLISHABLE_KEY === 'pk_live_your_key_here') {
+                alert('Payment is not configured. Set STRIPE_PUBLISHABLE_KEY before deploying.');
+                return;
+            }
+
+            // NOTE: stripe.redirectToCheckout({ lineItems }) is deprecated by Stripe.
+            // The modern flow requires a server-side Checkout Session (e.g., a Vercel/CF Worker
+            // endpoint that calls stripe.checkout.sessions.create and returns the session ID).
+            // Replace this block with: stripe.redirectToCheckout({ sessionId: '<from server>' })
+            const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+            localStorage.setItem('cached_audit_session', JSON.stringify(localAuditSession));
+
+            stripe.redirectToCheckout({
+                lineItems: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+                mode: 'payment',
+                successUrl: window.location.origin + window.location.pathname + '?payment=success',
+                cancelUrl: window.location.origin + window.location.pathname,
+            }).then(result => {
+                if (result.error) {
+                    localStorage.removeItem('cached_audit_session');
+                    alert(result.error.message);
+                }
+            });
+        }
+
+        function compileFinalPDF(sessionData) {
+            const docDefinition = {
+                content: [
+                    { text: 'FORMAL NOTICE OF BILLING COMPLIANCE DISPUTE', style: 'header', alignment: 'center' },
+                    { text: `Date Generated: ${new Date().toLocaleDateString()}`, alignment: 'right', fontSize: 10, color: '#718096' },
+                    { text: '\nMEMORANDUM FOR RECORD', style: 'subheader' },
+                    { text: `To: Medical Billing Director / Patient Financial Compliance Branch\nFacility: ${sessionData.facilityName}\nService Date Reference: ${sessionData.visitDate}\n` },
+                    { text: 'Dear Administration,\n\nI am writing to formally challenge the accuracy and legality of the statements issued regarding my recent care. Following a line-by-line internal compliance audit, the structural integrity of the invoice exhibits distinct conflicts with existing billing regulation standards.', style: 'bodyText' },
+                    sessionData.isIllegalBalanceBill ? {
+                        stack: [
+                            { text: '\nFEDERAL LEGISLATIVE COMPLIANCE VIOLATION:', style: 'warningTitle' },
+                            { text: sessionData.violationReason, style: 'warningText' },
+                            { text: 'Pursuant to the statutory provisions of the No Surprises Act (Public Law 116-260), balance-billing calculations for emergency tracking scenarios are explicitly prohibited. My liability constraints are restricted strictly to native contractual cost-sharing ceilings.', style: 'warningText' }
+                        ]
+                    } : null,
+                    sessionData.flaggedItems.length > 0 ? {
+                        stack: [
+                            { text: '\nDISPUTED ITEMIZATION TABLE BREAKDOWN:', style: 'sectionHeader' },
+                            {
+                                table: {
+                                    headerRows: 1,
+                                    widths: ['*', 'auto', 'auto'],
+                                    body: [
+                                        [
+                                            { text: 'Description', style: 'tableHeader' },
+                                            { text: 'Audit Exception Issue', style: 'tableHeader' },
+                                            { text: 'Amount Charged', style: 'tableHeader' }
+                                        ],
+                                        ...sessionData.flaggedItems.map(f => [f.item, f.issue, `$${f.amountFlagged.toFixed(2)}`])
+                                    ]
+                                },
+                                layout: 'lightHorizontalLines'
+                            }
+                        ]
+                    } : null,
+                    { text: `\nAggregated Dispute Adjustments Request: $${sessionData.totalSavingsEstimated.toFixed(2)}`, style: 'totalHighlight' },
+                    { text: '\nREQUIREMENT OF ACTION NOTICE:\nPlease confirm written receipt of this communication. Concurrently, request a formal programmatic hold status placed on all localized billing profiles and collections pipelines associated with this record while active investigation calculations take place.\n\nRespectfully submitted,\n\n\n_________________________________________\nPatient Signature Record Verification', style: 'bodyText' }
+                // Filter nulls — pdfmake throws on null content entries
+                ].filter(Boolean),
+                styles: {
+                    header:         { fontSize: 15, bold: true, color: '#1A365D', margin: [0, 0, 0, 10] },
+                    subheader:      { fontSize: 11, bold: true, color: '#2D3748', margin: [0, 5, 0, 5] },
+                    sectionHeader:  { fontSize: 12, bold: true, color: '#1A365D', margin: [0, 15, 0, 5] },
+                    bodyText:       { fontSize: 10, lineHeight: 1.4, color: '#2D3748' },
+                    tableHeader:    { fontSize: 10, bold: true, color: '#4A5568', fillColor: '#EDF2F7' },
+                    warningTitle:   { fontSize: 11, bold: true, color: '#C53030' },
+                    warningText:    { fontSize: 10, color: '#9B2C2C', margin: [0, 2, 0, 4], italic: true },
+                    totalHighlight: { fontSize: 12, bold: true, color: '#2B6CB0', margin: [0, 5, 0, 5] }
+                }
+            };
+
+            const filename = `Dispute_Document_${sessionData.facilityName.replace(/\s+/g, '_')}.pdf`;
+            pdfMake.createPdf(docDefinition).download(filename);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('payment') === 'success') {
+                const savedSession = localStorage.getItem('cached_audit_session');
+
+                if (savedSession) {
+                    try {
+                        const parsedData = JSON.parse(savedSession);
+                        compileFinalPDF(parsedData);
+                    } catch (e) {
+                        console.error('Failed to parse saved audit session:', e);
+                    } finally {
+                        localStorage.removeItem('cached_audit_session');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
