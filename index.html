@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stateless Medical Bill Auditor</title>
+    <title>Free Medical Bill Auditor — Detect Errors & NSA Violations Instantly</title>
+    <meta name="description" content="Check your medical bill for No Surprises Act violations and common unbundling errors. 100% private — all analysis happens in your browser, nothing is uploaded.">
+    <link rel="canonical" href="https://YOUR_DOMAIN/">
+    <meta property="og:title" content="Free Medical Bill Auditor — Detect Errors & NSA Violations Instantly">
+    <meta property="og:description" content="Check your medical bill for No Surprises Act violations and common unbundling errors. 100% private — nothing is uploaded.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://YOUR_DOMAIN/">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
@@ -13,7 +19,11 @@
 
     <header class="bg-blue-600 text-white py-4 px-6 shadow-md">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight">MediShield Auditor</h1>
+            <a href="/" class="text-xl font-bold tracking-tight hover:text-blue-200 transition">MediShield Auditor</a>
+            <nav class="flex gap-6 text-sm font-medium">
+                <a href="/" class="text-blue-200 border-b border-blue-300">Auditor Tool</a>
+                <a href="/blog/" class="hover:text-blue-200 transition">Blog</a>
+            </nav>
             <div class="bg-blue-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-blue-500">
                 <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
                 100% Stateless: Data Never Leaves Your Device
@@ -128,6 +138,34 @@
             </div>
         </section>
     </main>
+
+    <section class="max-w-5xl mx-auto px-4 md:px-8 py-10 border-t border-gray-200 mt-4">
+        <div class="flex justify-between items-baseline mb-6">
+            <h2 class="text-lg font-bold text-gray-800">From the Blog</h2>
+            <a href="/blog/" class="text-sm text-blue-600 font-semibold hover:underline">View all &rarr;</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <a href="/blog/no-surprises-act-explained.html" class="block bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                <span class="text-[10px] font-bold uppercase text-red-500 tracking-wider">Federal Law</span>
+                <p class="text-sm font-semibold text-gray-800 mt-1 leading-snug">The No Surprises Act: Your Protection Against Unexpected Bills</p>
+                <p class="text-xs text-gray-400 mt-2">7 min read</p>
+            </a>
+            <a href="/blog/how-to-dispute-a-medical-bill.html" class="block bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                <span class="text-[10px] font-bold uppercase text-blue-500 tracking-wider">Step-by-Step Guide</span>
+                <p class="text-sm font-semibold text-gray-800 mt-1 leading-snug">How to Dispute a Medical Bill (and Actually Win)</p>
+                <p class="text-xs text-gray-400 mt-2">8 min read</p>
+            </a>
+            <a href="/blog/common-medical-billing-errors.html" class="block bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+                <span class="text-[10px] font-bold uppercase text-amber-600 tracking-wider">Know the Red Flags</span>
+                <p class="text-sm font-semibold text-gray-800 mt-1 leading-snug">7 Common Medical Billing Errors That Cost Patients Money</p>
+                <p class="text-xs text-gray-400 mt-2">6 min read</p>
+            </a>
+        </div>
+    </section>
+
+    <footer class="max-w-5xl mx-auto px-4 md:px-8 py-8 text-center text-xs text-gray-400 border-t border-gray-200">
+        MediShield Auditor is an educational tool. Nothing here constitutes legal or medical advice. &copy; 2026 MediShield Auditor.
+    </footer>
 
     <script>
         // Initialize Stripe lazily inside triggerPremiumCheckout to avoid throwing on page load
