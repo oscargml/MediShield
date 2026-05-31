@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9YY4G7MTHH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-9YY4G7MTHH');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | MediShield Auditor</title>
+    <meta name="description" content="How MediShield Auditor handles your data: bill analysis runs entirely in your browser, payments are processed by Stripe, and we use privacy-respecting analytics.">
+    <link rel="canonical" href="https://medishield.xyz/privacy.html">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Privacy Policy | MediShield Auditor">
+    <meta property="og:description" content="How MediShield Auditor handles your data: bill analysis runs entirely in your browser; nothing is uploaded.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://medishield.xyz/privacy.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased flex flex-col min-h-screen">
+
+    <header class="bg-blue-600 text-white py-4 px-6 shadow-md">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+            <a href="./" class="text-xl font-bold tracking-tight hover:text-blue-200 transition">MediShield</a>
+            <nav class="flex gap-6 text-sm font-medium">
+                <a href="./" class="hover:text-blue-200 transition">Auditor Tool</a>
+                <a href="./blog/" class="hover:text-blue-200 transition">Blog</a>
+            </nav>
+            <div class="bg-blue-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-blue-500">
+                <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
+                100% Stateless: Data Never Leaves Your Device
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 md:p-8 flex-grow w-full">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+            <h1 class="text-3xl font-black text-gray-900 mb-2">Privacy Policy</h1>
+            <p class="text-sm text-gray-400 mb-8">Last updated: May 30, 2026</p>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
+                <p class="text-sm text-blue-900 leading-relaxed"><strong>The short version:</strong> MediShield analyzes your medical bill entirely inside your own web browser. The bill details you enter — line items, charges, facility name, dates — are <strong>never uploaded to our servers</strong>. We use Google Analytics to understand site traffic, and Stripe to process the optional $5 dispute-letter payment. That's it.</p>
+            </div>
+
+            <div class="space-y-8 text-gray-700 leading-relaxed text-[15px]">
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">1. Who we are</h2>
+                    <p>MediShield Auditor ("MediShield", "we", "us") operates the website at <span class="font-medium">medishield.xyz</span>. We provide a free, browser-based tool that helps people review medical bills for common billing errors and No Surprises Act violations. This policy explains what data we handle and your choices regarding it.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">2. The bill data you enter stays on your device</h2>
+                    <p>All bill analysis happens locally in your browser using JavaScript. The information you type into the auditor — including charges, billing codes, facility names, visit dates, and insurance details — is processed on your device and is <strong>not transmitted to, stored on, or accessible by our servers</strong>.</p>
+                    <p class="mt-2">To let you regenerate your dispute PDF after paying, a copy of your most recent audit is temporarily saved in your browser's <code class="bg-gray-100 px-1 rounded text-sm">localStorage</code> (under the key <code class="bg-gray-100 px-1 rounded text-sm">cached_audit_session</code>). This data never leaves your browser and is removed automatically once the PDF is generated. You can clear it anytime by clearing your browser storage.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">3. Information we do collect</h2>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Usage &amp; analytics data.</strong> We use Google Analytics to measure traffic and improve the site. It collects standard analytics information such as pages visited, referring site, approximate location (derived from IP address), device and browser type, and interaction events. This is collected via cookies and similar technologies.</li>
+                        <li><strong>Payment information.</strong> If you choose to purchase a Formal Dispute PDF ($5), payment is handled entirely by <strong>Stripe</strong>. You enter your card details on Stripe's secure checkout — we never see or store your full card number. We receive only a confirmation that payment succeeded.</li>
+                        <li><strong>Technical request logs.</strong> Our payment backend runs on Cloudflare Workers. Like most web infrastructure, Cloudflare may process limited technical metadata (such as IP address and request headers) to deliver and secure the service. These requests contain no medical bill data.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">4. How we use information</h2>
+                    <p>We use the limited data we collect to operate, maintain, secure, and improve the website; to process your optional payment; and to understand aggregate usage trends. We do <strong>not</strong> sell your personal information, and we do not use your bill data for advertising.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">5. Third-party services</h2>
+                    <p>We rely on the following processors, each governed by its own privacy policy:</p>
+                    <ul class="list-disc pl-5 space-y-1 mt-2">
+                        <li><a href="https://policies.google.com/privacy" class="text-blue-600 hover:underline" rel="noopener" target="_blank">Google Analytics</a> — site analytics</li>
+                        <li><a href="https://stripe.com/privacy" class="text-blue-600 hover:underline" rel="noopener" target="_blank">Stripe</a> — payment processing</li>
+                        <li><a href="https://www.cloudflare.com/privacypolicy/" class="text-blue-600 hover:underline" rel="noopener" target="_blank">Cloudflare</a> — backend hosting &amp; security</li>
+                        <li><a href="https://vercel.com/legal/privacy-policy" class="text-blue-600 hover:underline" rel="noopener" target="_blank">Vercel</a> — website hosting</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">6. Cookies</h2>
+                    <p>We use cookies set by Google Analytics to distinguish visitors and measure usage. You can block or delete cookies through your browser settings; the auditor tool will continue to work without them. Where required by law, we will ask for your consent before setting non-essential cookies.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">7. Data retention</h2>
+                    <p>Because we don't collect your bill data, there is nothing for us to retain about your medical information. Analytics data is retained according to Google Analytics' default retention settings. Payment records are retained by Stripe as required for financial and tax compliance.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">8. Your privacy rights</h2>
+                    <p>Depending on where you live, you may have rights under laws such as the EU/UK <strong>GDPR</strong> or the <strong>California Consumer Privacy Act (CCPA/CPRA)</strong>, including the right to access, correct, delete, or port your personal data, and to opt out of its sale (we do not sell personal data). To exercise these rights, contact us using the details below.</p>
+                    <p class="mt-2">You can opt out of Google Analytics across all sites using the <a href="https://tools.google.com/dlpage/gaoptout" class="text-blue-600 hover:underline" rel="noopener" target="_blank">Google Analytics Opt-out Browser Add-on</a>.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">9. International data transfers</h2>
+                    <p>Our service providers may process data in the United States and other countries. Where personal data is transferred internationally, those providers rely on recognized safeguards such as Standard Contractual Clauses.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">10. Children's privacy</h2>
+                    <p>MediShield is not directed to children under 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from them.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">11. Changes to this policy</h2>
+                    <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date above. Material changes will be highlighted on this page.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-lg font-bold text-gray-900 mb-2">12. Contact</h2>
+                    <p>Questions about this policy or your data? Contact us at <a href="mailto:privacy@medishield.xyz" class="text-blue-600 hover:underline">privacy@medishield.xyz</a>.</p>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-5xl mx-auto px-4 md:px-8 py-8 text-center text-xs text-gray-400 border-t border-gray-200 mt-12">
+        MediShield Auditor is an educational tool. Nothing here constitutes legal or medical advice. &copy; 2026 MediShield Auditor.
+        &middot; <a href="./privacy.html" class="hover:text-blue-500 transition">Privacy Policy</a>
+    </footer>
+
+</body>
+</html>
