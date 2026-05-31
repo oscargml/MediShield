@@ -31,12 +31,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Medical Bill Checker | Dispute Hospital Overcharges & NSA Violations</title>
     <meta name="description" content="Check your medical bill for No Surprises Act violations and common unbundling errors. 100% private — all analysis happens in your browser, nothing is uploaded.">
-    <!-- NOTE: For production, compile Tailwind instead of using the CDN for better SEO/Load speeds -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+<body class="bg-gray-50 text-gray-900 font-sans antialiased flex flex-col min-h-screen">
 
     <header class="bg-blue-600 text-white py-4 px-6 shadow-md">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
@@ -48,7 +47,7 @@
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <main class="max-w-5xl mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8 flex-grow">
         <section class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">1. Case Details</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -144,9 +143,30 @@
         </section>
     </main>
 
+    <!-- SEO Knowledge Base & Blog Index Section -->
+    <footer class="bg-gray-900 text-gray-400 text-sm mt-12 border-t border-gray-800">
+        <div class="max-w-5xl mx-auto px-6 py-10">
+            <div class="mb-8">
+                <h3 class="text-white font-bold text-base mb-4 tracking-tight">Consumer Protection Resources & Guides</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="./blog/how-to-dispute-unbundled-hospital-charges.html" class="block p-3.5 bg-gray-800 rounded-xl hover:bg-gray-750 border border-gray-750 transition group">
+                        <span class="block text-white font-semibold text-sm group-hover:text-blue-400 transition mb-0.5">Fighting Unbundled Hospital Charges</span>
+                        <span class="text-xs text-gray-400">Learn how to identify and split routine operational materials mistakenly itemized on individual line metrics.</span>
+                    </a>
+                    <a href="./blog/understanding-no-surprises-act-protections.html" class="block p-3.5 bg-gray-800 rounded-xl hover:bg-gray-750 border border-gray-750 transition group">
+                        <span class="block text-white font-semibold text-sm group-hover:text-blue-400 transition mb-0.5">Navigating the No Surprises Act (NSA)</span>
+                        <span class="text-xs text-gray-400">Discover your absolute legal protections against unexpected balance-billing loops from out-of-network physicians.</span>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">
+                &copy; 2026 MediShield Auditor. All metrics computed statelessly local to user hardware.
+            </div>
+        </div>
+    </footer>
+
     <script>
-// --- REPLACE THIS WITH YOUR CLOUDFLARE WORKER URL ---
-const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
+        const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
 
         let localAuditSession = null;
         document.getElementById('visitDate').value = new Date().toISOString().split('T')[0];
@@ -177,7 +197,7 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
                 runLogic();
                 btn.innerHTML = `Analyze Statement Locally`;
                 btn.disabled = false;
-            }, 800); // Fake delay for perceived value
+            }, 800);
         }
 
         function runLogic() {
@@ -255,16 +275,18 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
             localStorage.setItem('cached_audit_session', JSON.stringify(localAuditSession));
 
             try {
-                // Call Cloudflare Worker to create checkout session
+                // Resolved payload origin binding structure to prevent routing failures
+                const cleanSuccessUrl = window.location.origin + window.location.pathname.split('?')[0] + '?session_id={CHECKOUT_SESSION_ID}';
+                
                 const res = await fetch(`${WORKER_URL}/create-checkout`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ success_url: window.location.href.split('?')[0] + '?session_id={CHECKOUT_SESSION_ID}' })
+                    body: JSON.stringify({ success_url: cleanSuccessUrl })
                 });
                 
                 const data = await res.json();
                 if (data.url) {
-                    window.location.href = data.url; // Redirect to Stripe
+                    window.location.href = data.url;
                 } else {
                     alert("Checkout error. Please try again.");
                     btn.textContent = "Generate Formal Dispute PDF ($5)";
@@ -277,7 +299,6 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
             }
         }
 
-        // Handle returning from Stripe
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const sessionId = urlParams.get('session_id');
@@ -286,7 +307,6 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
                 document.body.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;"><h3>Verifying payment and generating your PDF...</h3></div>';
                 
                 try {
-                    // Ask Worker to verify payment
                     const verifyRes = await fetch(`${WORKER_URL}/verify-checkout`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -300,7 +320,7 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
                         if (savedSession) compileFinalPDF(JSON.parse(savedSession));
                         localStorage.removeItem('cached_audit_session');
                         alert("Your PDF has been generated and downloaded!");
-                        window.location.href = window.location.pathname; // Clean URL
+                        window.location.href = window.location.pathname;
                     } else {
                         alert("Payment could not be verified.");
                         window.location.href = window.location.pathname;
@@ -312,7 +332,6 @@ const WORKER_URL = 'https://medishield-api.medishield-api.workers.dev';
             }
         });
 
-        // PDF Generation Code (Kept Exactly the same as your original)
         function compileFinalPDF(sessionData) {
             const docDefinition = {
                 content: [
