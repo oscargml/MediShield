@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /*?payment=success
+# Keep the post-payment verification URL out of the index
+Disallow: /*?session_id=
 
-# Point Google directly to your stateless sitemap
-Sitemap: https://oscargml.github.io/MediShield/sitemap.xml
+# Point crawlers directly to the sitemap
+Sitemap: https://medishield.xyz/sitemap.xml
