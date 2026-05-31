@@ -279,11 +279,14 @@
                     body: JSON.stringify({ success_url: cleanSuccessUrl })
                 });
                 
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (data.url) {
                     window.location.href = data.url;
                 } else {
-                    alert("Checkout error. Please try again.");
+                    // Surface the worker's real reason (e.g. missing Stripe secret)
+                    // instead of a generic message, so failures are debuggable.
+                    console.error('Checkout failed:', res.status, data);
+                    alert(`Checkout error: ${data.error || `server returned ${res.status}`}. Please try again.`);
                     btn.textContent = "Generate Formal Dispute PDF ($5)";
                     btn.disabled = false;
                 }
