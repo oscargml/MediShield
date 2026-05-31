@@ -8,9 +8,15 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Privacy policy -->
+  <!-- Legal pages -->
   <url>
     <loc>https://medishield.xyz/privacy.html</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://medishield.xyz/terms.html</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
